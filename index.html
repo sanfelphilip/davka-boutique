@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tienda Online - Catálogo de Ropa</title>
+  <style>
+    body {font-family: 'Poppins', sans-serif; background: #f8f8fb; margin: 0; padding: 0;}
+    header {background: linear-gradient(90deg, #ff7eb3, #6ec1e4); color: white; padding: 1rem; text-align: center;}
+    h1 {margin: 0; font-size: 1.8rem;}
+    .container {display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; padding: 1rem;}
+    .card {background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden; display: flex; flex-direction: column; align-items: center; padding: 1rem;}
+    .card img {width: 100%; height: 220px; object-fit: cover; border-radius: 10px;}
+    .card h3 {margin: 0.5rem 0;}
+    .card p {font-weight: bold; color: #333;}
+    .card button {background: linear-gradient(90deg, #ff7eb3, #6ec1e4); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;}
+    .cart {position: fixed; top: 0; right: 0; width: 320px; height: 100%; background: white; box-shadow: -3px 0 10px rgba(0,0,0,0.2); transform: translateX(100%); transition: transform 0.3s ease-in-out; padding: 1rem; overflow-y: auto;}
+    .cart.open {transform: translateX(0);}
+    .cart h2 {text-align: center; margin-top: 0;}
+    .cart-item {display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 0.5rem 0;}
+    .cart-item span {font-size: 0.9rem;}
+    #admin-panel {padding: 1rem; background: #fff5f8; border-top: 2px solid #ff7eb3;}
+    input, button {margin: 0.3rem;}
+    .toggle-cart {position: fixed; top: 1rem; right: 1rem; background: #6ec1e4; color: white; border: none; padding: 0.6rem 1rem; border-radius: 20px; cursor: pointer; font-weight: bold;}
+    footer {text-align: center; padding: 1rem; color: #666; background: #fafafa; font-size: 0.9rem;}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Catálogo de Ropa</h1>
+  </header>
+  <button class="toggle-cart" onclick="toggleCart()">🛒 Carrito</button>
+  <div id="product-list" class="container"></div>
+
+  <div class="cart" id="cart">
+    <h2>Tu Carrito</h2>
+    <div id="cart-items"></div>
+    <h3>Total: $<span id="cart-total">0.00</span></h3>
+    <button onclick="checkout()">Finalizar Compra</button>
+  </div>
+
+  <div id="admin-panel">
+    <h3>Modo Administrador</h3>
+    <input type="text" id="prod-name" placeholder="Nombre del producto" />
+    <input type="number" id="prod-price" placeholder="Precio" />
+    <input type="text" id="prod-img" placeholder="URL de la imagen" />
+    <button onclick="addProduct()">Agregar producto</button>
+  </div>
+
+  <footer>© 2025 Tienda Online. Todos los derechos reservados.</footer>
+
+  <script>
+    let products = [
+      { name: 'Camisa Casual', price: 25, img: 'https://images.unsplash.com/photo-1600181955165-7c2dc5082e92?auto=format&fit=crop&w=400&q=60' },
+      { name: 'Blusa Elegante', price: 30, img: 'https://images.unsplash.com/photo-1562158070-57e3d1a2c046?auto=format&fit=crop&w=400&q=60' },
+      { name: 'Chaqueta Unisex', price: 50, img: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=400&q=60' }
+    ];
+    let cart = [];
+
+    function renderProducts() {
+      const list = document.getElementById('product-list');
+      list.innerHTML = '';
+      products.forEach((p, i) => {
+        list.innerHTML += \`
+          <div class="card">
+            <img src="\${p.img}" alt="\${p.name}">
+            <h3>\${p.name}</h3>
+            <p>$\${p.price.toFixed(2)}</p>
+            <button onclick="addToCart(\${i})">Agregar</button>
+          </div>
+        \`;
+      });
+    }
+
+    function addToCart(index) {
+      cart.push(products[index]);
+      updateCart();
+    }
+
+    function updateCart() {
+      const items = document.getElementById('cart-items');
+      items.innerHTML = '';
+      let total = 0;
+      cart.forEach((item, i) => {
+        total += item.price;
+        items.innerHTML += \`
+          <div class="cart-item">
+            <span>\${item.name}</span>
+            <span>$\${item.price.toFixed(2)}</span>
+            <button onclick="removeItem(\${i})">❌</button>
+          </div>
+        \`;
+      });
+      document.getElementById('cart-total').textContent = total.toFixed(2);
+    }
+
+    function removeItem(i) {
+      cart.splice(i, 1);
+      updateCart();
+    }
+
+    function toggleCart() {
+      document.getElementById('cart').classList.toggle('open');
+    }
+
+    function checkout() {
+      if (cart.length === 0) {
+        alert('Tu carrito está vacío.');
+      } else {
+        alert('Gracias por tu compra!');
+        cart = [];
+        updateCart();
+        toggleCart();
+      }
+    }
+
+    function addProduct() {
+      const name = document.getElementById('prod-name').value;
+      const price = parseFloat(document.getElementById('prod-price').value);
+      const img = document.getElementById('prod-img').value;
+      if (!name || !price || !img) return alert('Completa todos los campos');
+      products.push({ name, price, img });
+      renderProducts();
+      document.getElementById('prod-name').value = '';
+      document.getElementById('prod-price').value = '';
+      document.getElementById('prod-img').value = '';
+    }
+
+    renderProducts();
+  </script>
+</body>
+</html>
